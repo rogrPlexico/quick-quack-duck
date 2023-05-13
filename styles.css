@@ -1,0 +1,7 @@
+.board {
+    display: flex;
+}
+
+.data-board-row {
+    display: grid;
+}

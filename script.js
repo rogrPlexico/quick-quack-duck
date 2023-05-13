@@ -1,3 +1,46 @@
+const gameDisplay = (() => {
+    let renderBoard = currentBoard => {
+        let boardDiv = document.querySelector('.board');
+        
+        if (Math.sqrt(currentBoard.length) % 1 === 0) {
+            let rows = Math.sqrt(currentBoard.length);
+            
+            for (let i = 1; i <= rows; i++) {
+                let displayRow = document.createElement('div');
+                displayRow.setAttribute('class', 'board-row');
+                displayRow.setAttribute('data-board-row', i);
+                
+                for (let j = 1; j <= rows; j++) {
+                    let displayCell = document.createElement('div');
+                    displayCell.setAttribute('class', 'board-cell');
+                    displayCell.setAttribute('data-board-column', j);
+                    displayCell.textContent = 'Quack';
+                    displayRow.appendChild(displayCell);
+                }
+                
+                boardDiv.appendChild(displayRow)
+            }
+        } else console.error('board must be a perfect square');
+    };
+    
+    let renderGamePiece = (boardState, player) => {
+        let displayCells = document.querySelectorAll('.board-cell');
+        let playerPiece = player.gamePiece;
+        
+        displayCells.forEach((cell, index) => 
+            cell.addEventListener('click', () => {
+                console.log('clicked');
+                cell.textContent = playerPiece;
+                return gameFlow.addPieceToBoard(boardState, player, index);
+            })
+        )
+        
+        
+    }
+    
+    return {renderBoard, renderGamePiece};
+})(); 
+
 // module to create board array and populate empty array with nulls, enabling proper use of splice() array method
 const nullsBoardArray = (() => {
     let emptyBoardArray = [];
@@ -8,16 +51,16 @@ const nullsBoardArray = (() => {
         }
     };
     addNulls(squares);
+    gameDisplay.renderBoard(emptyBoardArray);
     return emptyBoardArray;
 })();
 
 // factory to create players
-const createPlayer = (userName, gamePiece) => {userName, gamePiece};
+const createPlayer = (userName, gamePiece) => {
+    return {userName, gamePiece};
+}
 
 // gameFlow module. Object contains methods for all game actions
-// Game Flow: initiateGame -> initiateTurn -> addPieceToBoard -> evaluateGameState -> return winner OR (changePlayerTurn & initiateTurn)
-// note recursive call to initiateTurn
-
 const gameFlow = (() => {
     let player1 = createPlayer('player1', 'x');
     let player2 = createPlayer('player2', 'o');
@@ -31,19 +74,21 @@ const gameFlow = (() => {
     initiateTurn = (boardState, currentPlayer) => {
         let currentBoardState = boardState;
         let player = currentPlayer;
-        return gameFlow.addPieceToBoard(currentBoardState, player);
+        // return gameFlow.addPieceToBoard(currentBoardState, player);
+        return gameDisplay.renderGamePiece(currentBoardState, player);
     };
 
-    addPieceToBoard = (boardState, player) => {
-        let playerSquareChoice = +prompt('0-8');
+    addPieceToBoard = (boardState, player, index) => {
+    //     let playerSquareChoice = setTimeout(() => {
+    //         +prompt('0-8');
+    //         }, 500);
         let currentPlayerPiece = player.gamePiece;
         let updatedBoardState = boardState;
-        updatedBoardState.splice(playerSquareChoice, 1, currentPlayerPiece);
-        console.log(updatedBoardState);
+        updatedBoardState.splice(index, 1, currentPlayerPiece);
         return gameFlow.evaluateGameState(updatedBoardState, player);
     };
 
-    changePlayerTurn = (previousPlayer) => {
+  changePlayerTurn = (previousPlayer) => {
         if (previousPlayer.userName == 'player1') nextPlayer = player2;
         else nextPlayer = player1;
         return nextPlayer;
@@ -91,6 +136,7 @@ const gameFlow = (() => {
         changePlayerTurn,
         evaluateGameState}
 })();
+
 
 let result = gameFlow.initiateGame();
 console.log('result: ')
