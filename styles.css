@@ -1,7 +1,36 @@
+body {
+    min-height: 99.85vh;
+    margin: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
 .board {
-    display: flex;
+    height: 80vh; /* set the height to be the full height of the viewport */
+    width: 80vw;
+    display: grid;
+    place-items: center;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px; /* add some spacing between cells */
+   
 }
 
-.data-board-row {
+/* .board-row {
     display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+    grid-gap: 10px;
+  } */
+
+.board-cell {
+    border: none; /* remove the border */
+    background: lightblue; /* set a light background color */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4rem; /* increase the font size */
+    color: #444; /* set a darker text color */
+    cursor: pointer; /* add a pointer cursor on hover */
+    transition: background-color 0.3s ease; /* add a transition on background color change */
 }

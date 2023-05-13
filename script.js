@@ -5,38 +5,32 @@ const gameDisplay = (() => {
         if (Math.sqrt(currentBoard.length) % 1 === 0) {
             let rows = Math.sqrt(currentBoard.length);
             
-            for (let i = 1; i <= rows; i++) {
-                let displayRow = document.createElement('div');
-                displayRow.setAttribute('class', 'board-row');
-                displayRow.setAttribute('data-board-row', i);
-                
-                for (let j = 1; j <= rows; j++) {
-                    let displayCell = document.createElement('div');
-                    displayCell.setAttribute('class', 'board-cell');
-                    displayCell.setAttribute('data-board-column', j);
-                    displayCell.textContent = 'Quack';
-                    displayRow.appendChild(displayCell);
+            for (let j = 1; j <= rows*rows; j++) {
+                let displayCell = document.createElement('div');
+                displayCell.setAttribute('class', 'board-cell');
+                displayCell.setAttribute('data-board-column', j);
+                displayCell.textContent = 'Quack';
+                boardDiv.appendChild(displayCell);
                 }
                 
-                boardDiv.appendChild(displayRow)
-            }
         } else console.error('board must be a perfect square');
     };
     
     let renderGamePiece = (boardState, player) => {
         let displayCells = document.querySelectorAll('.board-cell');
         let playerPiece = player.gamePiece;
-        
-        displayCells.forEach((cell, index) => 
-            cell.addEventListener('click', () => {
-                console.log('clicked');
-                cell.textContent = playerPiece;
-                return gameFlow.addPieceToBoard(boardState, player, index);
-            })
-        )
-        
-        
-    }
+
+        let clickSquare = (cell, index) => {
+            cell.textContent = playerPiece;
+            console.log(event);
+            // cell.removeEventListener('click', clickSquare);
+            return gameFlow.addPieceToBoard(boardState, player, index);
+        } 
+
+        displayCells.forEach((cell, index) => {
+            cell.addEventListener('click', () => clickSquare(cell, index));
+        });
+    };
     
     return {renderBoard, renderGamePiece};
 })(); 
@@ -73,15 +67,13 @@ const gameFlow = (() => {
   
     initiateTurn = (boardState, currentPlayer) => {
         let currentBoardState = boardState;
+        console.log(currentBoardState);
         let player = currentPlayer;
-        // return gameFlow.addPieceToBoard(currentBoardState, player);
+        // renderGamePiece should be called once at initiateGame. Need to pass in playerState to the event
         return gameDisplay.renderGamePiece(currentBoardState, player);
     };
 
     addPieceToBoard = (boardState, player, index) => {
-    //     let playerSquareChoice = setTimeout(() => {
-    //         +prompt('0-8');
-    //         }, 500);
         let currentPlayerPiece = player.gamePiece;
         let updatedBoardState = boardState;
         updatedBoardState.splice(index, 1, currentPlayerPiece);
