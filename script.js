@@ -1,9 +1,9 @@
 const gameDisplay = (() => {
-    let renderBoard = currentBoard => {
+    let renderEmptyBoard = emptyBoardArray => {
         let boardDiv = document.querySelector('.board');
         
-        if (Math.sqrt(currentBoard.length) % 1 === 0) {
-            let rows = Math.sqrt(currentBoard.length);
+        if (Math.sqrt(emptyBoardArray.length) % 1 === 0) {
+            let rows = Math.sqrt(emptyBoardArray.length);
             
             for (let j = 1; j <= rows*rows; j++) {
                 let displayCell = document.createElement('div');
@@ -16,24 +16,38 @@ const gameDisplay = (() => {
         } else console.error('board must be a perfect square');
     };
     
-    let renderGamePiece = (boardState, player) => {
+    let addRenderGamePieceEventListener = () => {
         let displayCells = document.querySelectorAll('.board-cell');
-        let playerPiece = player.gamePiece;
-
+        
         let clickSquare = (cell, index) => {
+            let player = gameFlow.getPlayerTurn();
+            console.log(player);
+            let playerPiece = player.gamePiece;
             cell.textContent = playerPiece;
-            console.log(event);
-            // cell.removeEventListener('click', clickSquare);
-            return gameFlow.addPieceToBoard(boardState, player, index);
+            // cell.player = player;
+            return initiateTurn(index);
         } 
 
         displayCells.forEach((cell, index) => {
-            cell.addEventListener('click', () => clickSquare(cell, index));
+            cell.addEventListener('click', () => clickSquare(cell, index), {once: true});
         });
     };
+
+        let endGame = () => {
+            let displayCells = document.querySelectorAll('.board-cell');
+            displayCells.forEach((cell) => {
+                const cellRemovedEventListner = cell.cloneNode(true);
+                cell.parentNode.replaceChild(cellRemovedEventListner, cell)
+            });
+        };
+
+        let displayWinner = (winner) => {
+            let winnerDiv = document.querySelector('.result');
+            winnerDiv.textContent = winner;
+        }
     
-    return {renderBoard, renderGamePiece};
-})(); 
+    return {renderEmptyBoard, addRenderGamePieceEventListener, endGame, displayWinner};
+})();  
 
 // module to create board array and populate empty array with nulls, enabling proper use of splice() array method
 const nullsBoardArray = (() => {
@@ -45,7 +59,7 @@ const nullsBoardArray = (() => {
         }
     };
     addNulls(squares);
-    gameDisplay.renderBoard(emptyBoardArray);
+    gameDisplay.renderEmptyBoard(emptyBoardArray);
     return emptyBoardArray;
 })();
 
@@ -58,80 +72,89 @@ const createPlayer = (userName, gamePiece) => {
 const gameFlow = (() => {
     let player1 = createPlayer('player1', 'x');
     let player2 = createPlayer('player2', 'o');
+    let playerTurn = player1;
+    let boardState = nullsBoardArray;
     
     initiateGame = () => {
-        let initialBoard = nullsBoardArray;
-        let playerTurn = player1;
-        return gameFlow.initiateTurn(initialBoard, playerTurn);
+        gameDisplay.addRenderGamePieceEventListener();
     };
   
-    initiateTurn = (boardState, currentPlayer) => {
-        let currentBoardState = boardState;
-        console.log(currentBoardState);
-        let player = currentPlayer;
-        // renderGamePiece should be called once at initiateGame. Need to pass in playerState to the event
-        return gameDisplay.renderGamePiece(currentBoardState, player);
+    initiateTurn = (index) => {
+        return gameFlow.addPieceToBoard(index);
     };
 
-    addPieceToBoard = (boardState, player, index) => {
-        let currentPlayerPiece = player.gamePiece;
-        let updatedBoardState = boardState;
-        updatedBoardState.splice(index, 1, currentPlayerPiece);
-        return gameFlow.evaluateGameState(updatedBoardState, player);
+    addPieceToBoard = (index) => {
+        let playerPiece = playerTurn.gamePiece;
+        
+        boardState.splice(index, 1, playerPiece);
+        return gameFlow.evaluateGameState();
     };
 
-  changePlayerTurn = (previousPlayer) => {
-        if (previousPlayer.userName == 'player1') nextPlayer = player2;
-        else nextPlayer = player1;
-        return nextPlayer;
+    changePlayerTurn = () => {
+        if (playerTurn.userName == 'player1') playerTurn = player2;
+        else playerTurn = player1;
     };
-    evaluateGameState = (boardState, player) => {
+
+    getPlayerTurn = () => {
+        return playerTurn;
+    };
+
+    evaluateGameState = () => {
+        console.log(boardState);
         if ( 
-            boardState[1] == 'x' && boardState[2] == 'x' && boardState[3] == 'x' ||
-            boardState[4] == 'x' && boardState[5] == 'x' && boardState[6] == 'x' ||
-            boardState[7] == 'x' && boardState[8] == 'x' && boardState[9] == 'x' ||
+            boardState[0] == 'x' && boardState[1] == 'x' && boardState[2] == 'x' ||
+            boardState[3] == 'x' && boardState[4] == 'x' && boardState[5] == 'x' ||
+            boardState[6] == 'x' && boardState[7] == 'x' && boardState[8] == 'x' ||
+            boardState[0] == 'x' && boardState[3] == 'x' && boardState[6] == 'x' ||
             boardState[1] == 'x' && boardState[4] == 'x' && boardState[7] == 'x' ||
             boardState[2] == 'x' && boardState[5] == 'x' && boardState[8] == 'x' ||
-            boardState[3] == 'x' && boardState[6] == 'x' && boardState[9] == 'x' ||
-            boardState[1] == 'x' && boardState[5] == 'x' && boardState[9] == 'x' ||
-            boardState[3] == 'x' && boardState[5] == 'x' && boardState[7] == 'x'
+            boardState[0] == 'x' && boardState[4] == 'x' && boardState[8] == 'x' ||
+            boardState[2] == 'x' && boardState[4] == 'x' && boardState[6] == 'x'
         ) {
+            gameDisplay.displayWinner('x wins')
             console.log('x wins');
+            gameDisplay.endGame();
             return 'x wins';
         }
         else if (
-            boardState[1] == 'o' && boardState[2] == 'o' && boardState[3] == 'o' ||
-            boardState[4] == 'o' && boardState[5] == 'o' && boardState[6] == 'o' ||
-            boardState[7] == 'o' && boardState[8] == 'o' && boardState[9] == 'o' ||
+            boardState[0] == 'o' && boardState[1] == 'o' && boardState[2] == 'o' ||
+            boardState[3] == 'o' && boardState[4] == 'o' && boardState[5] == 'o' ||
+            boardState[6] == 'o' && boardState[7] == 'o' && boardState[8] == 'o' ||
+            boardState[0] == 'o' && boardState[3] == 'o' && boardState[6] == 'o' ||
             boardState[1] == 'o' && boardState[4] == 'o' && boardState[7] == 'o' ||
             boardState[2] == 'o' && boardState[5] == 'o' && boardState[8] == 'o' ||
-            boardState[3] == 'o' && boardState[6] == 'o' && boardState[9] == 'o' ||
-            boardState[1] == 'o' && boardState[5] == 'o' && boardState[9] == 'o' ||
-            boardState[3] == 'o' && boardState[5] == 'o' && boardState[7] == 'o' 
+            boardState[0] == 'o' && boardState[4] == 'o' && boardState[8] == 'o' ||
+            boardState[2] == 'o' && boardState[4] == 'o' && boardState[6] == 'o' 
         ) {
+            gameDisplay.displayWinner('o wins')
             console.log('o wins');
+            gameDisplay.endGame();
             return 'o wins';
         }
         else if (boardState.every(value => value !== 'null' )) {
+            gameDisplay.displayWinner('you both lose')
             console.log('tie');
+            gameDisplay.endGame();
             return 'tie';
         }
         else { 
-            let nextPlayer = gameFlow.changePlayerTurn(player);
-            return gameFlow.initiateTurn(boardState, nextPlayer);
+            gameFlow.changePlayerTurn();
         }   
     };
     return {
+        playerTurn,
+        boardState,
         initiateGame, 
         initiateTurn, 
         addPieceToBoard,
         changePlayerTurn,
-        evaluateGameState}
+        getPlayerTurn,
+        evaluateGameState,
+        }
 })();
 
 
 let result = gameFlow.initiateGame();
-console.log('result: ')
-console.log(result);
+
 
 

@@ -3,9 +3,14 @@ body {
     margin: 0;
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
+
+div {
+    font-size: 50px;
+}
+
 .board {
-    height: 80vh; /* set the height to be the full height of the viewport */
-    width: 80vw;
+    height: 70vh; /* set the height to be the full height of the viewport */
+    width: 70vw;
     display: grid;
     place-items: center;
     grid-template-columns: repeat(3, 1fr);
@@ -14,18 +19,11 @@ body {
    
 }
 
-/* .board-row {
-    display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr;
-    grid-gap: 10px;
-  } */
-
 .board-cell {
     border: none; /* remove the border */
     background: lightblue; /* set a light background color */
-    width: 100%;
-    height: 100%;
+    width: 99.5%;
+    height: 99.5%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -34,3 +32,9 @@ body {
     cursor: pointer; /* add a pointer cursor on hover */
     transition: background-color 0.3s ease; /* add a transition on background color change */
 }
+
+.result {
+    color: red;
+    font-size: 5vw;
+}
+
